@@ -1,0 +1,9 @@
+{
+  "name": "@game/client",
+  "uuid": "c6c0afbe-ddea-4eb8-a29a-28c194f6e602",
+  "version": "3.6.0",
+  "creator": {
+    "version": "3.6.0"
+  },
+  "type": "module"
+}
