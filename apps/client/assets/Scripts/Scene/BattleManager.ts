@@ -24,6 +24,7 @@ export class BattleManager extends Component {
     this.stage = this.node.getChildByName("Stage");
     this.ui = this.node.getChildByName("UI");
     this.stage.destroyAllChildren();
+    DataManager.Instance.stage = this.stage;
     DataManager.Instance.jm = this.ui.getComponentInChildren(JoyStickManager);
   }
 

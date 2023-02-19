@@ -9,7 +9,9 @@ export enum ParamsNameEnum {
   Attack = "Attack",
 }
 
-export enum EventEnum {}
+export enum EventEnum {
+  WeaponShoot = "WeaponShoot",
+}
 
 export enum PrefabPathEnum {
   Map = "prefab/Map",
