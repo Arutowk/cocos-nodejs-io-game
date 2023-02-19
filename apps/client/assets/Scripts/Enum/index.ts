@@ -10,3 +10,8 @@ export enum ParamsNameEnum {
 }
 
 export enum EventEnum {}
+
+export enum PrefabPathEnum {
+  Map = "prefab/Map",
+  Actor1 = "prefab/Actor",
+}
