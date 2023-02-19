@@ -39,7 +39,6 @@ export class JoyStickManager extends Component {
   onTouchStart(event: EventTouch) {
     const touchPos = event.getUILocation();
     this.body.setPosition(touchPos.x, touchPos.y);
-    console.log(event.getUILocation());
   }
 
   onTouchEnd() {
@@ -64,6 +63,5 @@ export class JoyStickManager extends Component {
 
     //归一化会改变原向量，所以要克隆
     this.input = stickPos.clone().normalize();
-    console.log(this.input);
   }
 }
