@@ -1,7 +1,14 @@
-import { _decorator, Component, Node, Prefab, instantiate } from "cc";
+import {
+  _decorator,
+  Component,
+  Node,
+  Prefab,
+  instantiate,
+  SpriteFrame,
+} from "cc";
 import { EntityTypeEnum } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
-import { PrefabPathEnum } from "../Enum";
+import { PrefabPathEnum, TexturePathEnum } from "../Enum";
 import DataManager from "../Global/DataManager";
 import { ResourceManager } from "../Global/ResourceManager";
 import { JoyStickManager } from "../UI/JoyStickManager";
@@ -29,12 +36,23 @@ export class BattleManager extends Component {
   async loadRes() {
     const list = [];
     //枚举编译为js其实就是对象
+    //预加载prefab
     for (const type in PrefabPathEnum) {
       const p = ResourceManager.Instance.loadRes(
         PrefabPathEnum[type],
         Prefab
       ).then((prefab) => {
         DataManager.Instance.prefabMap.set(type, prefab);
+      });
+      list.push(p);
+    }
+    //预加载texture
+    for (const type in TexturePathEnum) {
+      const p = ResourceManager.Instance.loadDir(
+        TexturePathEnum[type],
+        SpriteFrame
+      ).then((spriteFrames) => {
+        DataManager.Instance.textureMap.set(type, spriteFrames);
       });
       list.push(p);
     }
@@ -47,13 +65,26 @@ export class BattleManager extends Component {
     map.setParent(this.stage);
   }
 
-  update() {
+  update(dt) {
     if (!this.shouldUpdate) return;
     this.render();
+    //管理Actor
+    this.tick(dt);
   }
 
   render() {
     this.renderActor();
+  }
+
+  tick(dt) {
+    this.tickActor(dt);
+  }
+  tickActor(dt) {
+    for (const data of DataManager.Instance.state.actors) {
+      const { id } = data;
+      let am = DataManager.Instance.actorMap.get(id);
+      am.tick(dt);
+    }
   }
 
   async renderActor() {
