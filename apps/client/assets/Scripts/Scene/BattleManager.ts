@@ -6,7 +6,7 @@ import {
   instantiate,
   SpriteFrame,
 } from "cc";
-import { EntityTypeEnum } from "../Common";
+import { EntityTypeEnum, InputTypeEnum } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
 import { BulletManager } from "../Entity/Bullet/BulletManager";
 import { PrefabPathEnum, TexturePathEnum } from "../Enum";
@@ -81,7 +81,12 @@ export class BattleManager extends Component {
 
   tick(dt) {
     this.tickActor(dt);
+    DataManager.Instance.applyInput({
+      type: InputTypeEnum.TimePast,
+      dt,
+    });
   }
+
   tickActor(dt) {
     for (const data of DataManager.Instance.state.actors) {
       const { id } = data;

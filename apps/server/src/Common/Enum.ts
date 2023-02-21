@@ -1,6 +1,7 @@
 export enum InputTypeEnum {
   ActorMove = "ActorMove",
   WeaponShoot = "WeaponShoot",
+  TimePast = "TimePast",
 }
 
 export enum EntityTypeEnum {
