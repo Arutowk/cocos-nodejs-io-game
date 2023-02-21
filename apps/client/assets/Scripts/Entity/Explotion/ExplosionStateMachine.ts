@@ -3,11 +3,10 @@ import State from "../../Base/State";
 import StateMachine, { getInitParamsTrigger } from "../../Base/StateMachine";
 import { EntityTypeEnum } from "../../Common";
 import { EntityStateEnum, ParamsNameEnum } from "../../Enum";
-import { WeaponManager } from "./WeaponManager";
 const { ccclass } = _decorator;
 
-@ccclass("WeaponStateMachine")
-export class WeaponStateMachine extends StateMachine {
+@ccclass("ExplosionStateMachine")
+export class ExplosionStateMachine extends StateMachine {
   init(type: EntityTypeEnum) {
     this.type = type;
     this.animationComponent = this.node.addComponent(Animation);
@@ -18,7 +17,6 @@ export class WeaponStateMachine extends StateMachine {
 
   initParams() {
     this.params.set(ParamsNameEnum.Idle, getInitParamsTrigger());
-    this.params.set(ParamsNameEnum.Attack, getInitParamsTrigger());
   }
 
   initStateMachines() {
@@ -27,40 +25,22 @@ export class WeaponStateMachine extends StateMachine {
       new State(
         this,
         `${this.type}${EntityStateEnum.Idle}`,
-        AnimationClip.WrapMode.Loop,
-        true
-      )
-    );
-    this.stateMachines.set(
-      ParamsNameEnum.Attack,
-      new State(
-        this,
-        `${this.type}${EntityStateEnum.Attack}`,
-        AnimationClip.WrapMode.Normal,
-        true
+        AnimationClip.WrapMode.Normal
       )
     );
   }
 
   initAnimationEvent() {
     this.animationComponent.on(Animation.EventType.FINISHED, () => {
-      if (
-        this.animationComponent.defaultClip.name.includes(
-          EntityStateEnum.Attack
-        )
-      ) {
-        this.node.parent.getComponent(WeaponManager).state =
-          EntityStateEnum.Idle;
-      }
+      this.node.destroy();
     });
   }
 
   run() {
     switch (this.currentState) {
       case this.stateMachines.get(ParamsNameEnum.Idle):
-      case this.stateMachines.get(ParamsNameEnum.Attack):
-        if (this.params.get(ParamsNameEnum.Attack).value) {
-          this.currentState = this.stateMachines.get(ParamsNameEnum.Attack);
+        if (this.params.get(ParamsNameEnum.Run).value) {
+          this.currentState = this.stateMachines.get(ParamsNameEnum.Run);
         } else if (this.params.get(ParamsNameEnum.Idle).value) {
           this.currentState = this.stateMachines.get(ParamsNameEnum.Idle);
         } else {

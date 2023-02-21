@@ -1,23 +1,51 @@
-import { _decorator, Component, Node } from "cc";
+import { _decorator, Component, Node, Vec2, instantiate, IVec2 } from "cc";
 import { EntityManager } from "../../Base/EntityManager";
 import { EntityTypeEnum, IActor, IBullet } from "../../Common";
-import { EntityStateEnum } from "../../Enum";
+import { EntityStateEnum, EventEnum } from "../../Enum";
+import DataManager from "../../Global/DataManager";
+import EventManager from "../../Global/EventManager";
 import { rad2Angle } from "../../Utils";
+import { ExplosionManager } from "../Explotion/ExplosionManager";
 import { BulletStateMachine } from "./BulletStateMachine";
 const { ccclass, property } = _decorator;
 
 @ccclass("BulletManager")
 export class BulletManager extends EntityManager {
   type: EntityTypeEnum;
+  id: number;
 
   init(data: IBullet) {
     this.type = data.type;
+    this.id = data.id;
     this.fsm = this.addComponent(BulletStateMachine);
     this.fsm.init(data.type);
 
     this.state = EntityStateEnum.Idle;
     //子弹生成时先看不到
     this.node.active = false;
+
+    EventManager.Instance.on(
+      EventEnum.ExplosionBorn,
+      this.handleExplosionBorn,
+      this
+    );
+  }
+
+  handleExplosionBorn(id: number, { x, y }: IVec2) {
+    if (id !== this.id) return;
+    const prefab = DataManager.Instance.prefabMap.get(EntityTypeEnum.Explosion);
+    const explosion = instantiate(prefab);
+    explosion.setParent(DataManager.Instance.stage);
+    const em = explosion.addComponent(ExplosionManager);
+    em.init(EntityTypeEnum.Explosion, { x, y });
+
+    EventManager.Instance.off(
+      EventEnum.ExplosionBorn,
+      this.handleExplosionBorn,
+      this
+    );
+    DataManager.Instance.bulletMap.delete(this.id);
+    this.node.destroy();
   }
 
   render(data: IBullet) {

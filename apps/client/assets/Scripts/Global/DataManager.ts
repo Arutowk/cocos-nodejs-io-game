@@ -2,7 +2,6 @@ import { Prefab, SpriteFrame, Node } from "cc";
 import Singleton from "../Base/Singleton";
 import {
   EntityTypeEnum,
-  IActorMove,
   IBullet,
   IClientInput,
   InputTypeEnum,
@@ -10,7 +9,9 @@ import {
 } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
 import { BulletManager } from "../Entity/Bullet/BulletManager";
+import { EventEnum } from "../Enum";
 import { JoyStickManager } from "../UI/JoyStickManager";
+import EventManager from "./EventManager";
 
 const ACTOR_SPEED = 100;
 const BULLET_SPEED = 600;
@@ -42,6 +43,7 @@ export default class DataManager extends Singleton {
   actorMap: Map<number, ActorManager> = new Map();
   prefabMap: Map<string, Prefab> = new Map();
   textureMap: Map<string, SpriteFrame[]> = new Map();
+  //通过数据id找到对应子弹cocos的node节点，大量子弹生成和爆炸的情况，map效率高
   bulletMap: Map<number, BulletManager> = new Map();
 
   //根据joystick的输入来移动角色
@@ -72,6 +74,8 @@ export default class DataManager extends Singleton {
           type: this.actorMap.get(owner).bulletType,
         };
         this.state.bullets.push(bullet);
+
+        EventManager.Instance.emit(EventEnum.BolletBorn, owner);
         break;
       }
       case InputTypeEnum.TimePast: {
@@ -84,11 +88,15 @@ export default class DataManager extends Singleton {
             Math.abs(bullet.position.x) > mapW / 2 ||
             Math.abs(bullet.position.y) > mapH / 2
           ) {
+            EventManager.Instance.emit(EventEnum.ExplosionBorn, bullet.id, {
+              x: bullet.position.x,
+              y: bullet.position.y,
+            });
             bullets.splice(i, 1);
           }
         }
 
-        for (const bullet of bullets) {
+        for (const bullet of this.state.bullets) {
           bullet.position.x += bullet.direction.x * dt * BULLET_SPEED;
           bullet.position.y += bullet.direction.y * dt * BULLET_SPEED;
         }
