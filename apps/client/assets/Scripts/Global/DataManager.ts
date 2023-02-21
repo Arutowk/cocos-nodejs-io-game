@@ -9,6 +9,7 @@ import {
   IState,
 } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
+import { BulletManager } from "../Entity/Bullet/BulletManager";
 import { JoyStickManager } from "../UI/JoyStickManager";
 
 const ACTOR_SPEED = 100;
@@ -24,7 +25,7 @@ export default class DataManager extends Singleton {
         id: 1,
         type: EntityTypeEnum.Actor1,
         weaponType: EntityTypeEnum.Weapon1,
-        bulletType: EntityTypeEnum.Bullet1,
+        bulletType: EntityTypeEnum.Bullet2,
         position: { x: 0, y: 0 },
         direction: { x: 1, y: 0 },
       },
@@ -37,6 +38,7 @@ export default class DataManager extends Singleton {
   actorMap: Map<number, ActorManager> = new Map();
   prefabMap: Map<string, Prefab> = new Map();
   textureMap: Map<string, SpriteFrame[]> = new Map();
+  bulletMap: Map<number, BulletManager> = new Map();
 
   //根据joystick的输入来移动角色
   applyInput(input: IClientInput) {
