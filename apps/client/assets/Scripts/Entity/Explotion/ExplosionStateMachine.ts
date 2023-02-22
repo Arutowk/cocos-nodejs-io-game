@@ -3,6 +3,7 @@ import State from "../../Base/State";
 import StateMachine, { getInitParamsTrigger } from "../../Base/StateMachine";
 import { EntityTypeEnum } from "../../Common";
 import { EntityStateEnum, ParamsNameEnum } from "../../Enum";
+import { ObjectPoolManager } from "../../Global/ObjectPoolManager";
 const { ccclass } = _decorator;
 
 @ccclass("ExplosionStateMachine")
@@ -32,7 +33,7 @@ export class ExplosionStateMachine extends StateMachine {
 
   initAnimationEvent() {
     this.animationComponent.on(Animation.EventType.FINISHED, () => {
-      this.node.destroy();
+      ObjectPoolManager.Instance.ret(this.node);
     });
   }
 

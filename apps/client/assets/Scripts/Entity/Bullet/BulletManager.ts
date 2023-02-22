@@ -4,6 +4,7 @@ import { EntityTypeEnum, IActor, IBullet } from "../../Common";
 import { EntityStateEnum, EventEnum } from "../../Enum";
 import DataManager from "../../Global/DataManager";
 import EventManager from "../../Global/EventManager";
+import { ObjectPoolManager } from "../../Global/ObjectPoolManager";
 import { rad2Angle } from "../../Utils";
 import { ExplosionManager } from "../Explotion/ExplosionManager";
 import { BulletStateMachine } from "./BulletStateMachine";
@@ -33,10 +34,11 @@ export class BulletManager extends EntityManager {
 
   handleExplosionBorn(id: number, { x, y }: IVec2) {
     if (id !== this.id) return;
-    const prefab = DataManager.Instance.prefabMap.get(EntityTypeEnum.Explosion);
-    const explosion = instantiate(prefab);
-    explosion.setParent(DataManager.Instance.stage);
-    const em = explosion.addComponent(ExplosionManager);
+    const explosion = ObjectPoolManager.Instance.get(EntityTypeEnum.Explosion);
+
+    const em =
+      explosion.getComponent(ExplosionManager) ||
+      explosion.addComponent(ExplosionManager);
     em.init(EntityTypeEnum.Explosion, { x, y });
 
     EventManager.Instance.off(
@@ -45,7 +47,7 @@ export class BulletManager extends EntityManager {
       this
     );
     DataManager.Instance.bulletMap.delete(this.id);
-    this.node.destroy();
+    ObjectPoolManager.Instance.ret(this.node);
   }
 
   render(data: IBullet) {
