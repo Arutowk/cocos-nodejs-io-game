@@ -35,9 +35,7 @@ export class BulletStateMachine extends StateMachine {
   run() {
     switch (this.currentState) {
       case this.stateMachines.get(ParamsNameEnum.Idle):
-        if (this.params.get(ParamsNameEnum.Run).value) {
-          this.currentState = this.stateMachines.get(ParamsNameEnum.Run);
-        } else if (this.params.get(ParamsNameEnum.Idle).value) {
+        if (this.params.get(ParamsNameEnum.Idle).value) {
           this.currentState = this.stateMachines.get(ParamsNameEnum.Idle);
         } else {
           this.currentState = this.currentState;

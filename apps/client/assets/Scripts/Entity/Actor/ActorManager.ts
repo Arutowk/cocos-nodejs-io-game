@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, instantiate } from "cc";
+import { _decorator, Component, Node, instantiate, ProgressBar } from "cc";
 import { EntityManager } from "../../Base/EntityManager";
 import { EntityTypeEnum, IActor, InputTypeEnum } from "../../Common";
 import { EntityStateEnum } from "../../Enum";
@@ -10,12 +10,16 @@ const { ccclass, property } = _decorator;
 
 @ccclass("ActorManager")
 export class ActorManager extends EntityManager {
+  id: number;
   bulletType: EntityTypeEnum;
 
+  private hp: ProgressBar;
   private wm: WeaponManager;
 
   init(data: IActor) {
+    this.id = data.id;
     this.bulletType = data.bulletType;
+    this.hp = this.node.getComponentInChildren(ProgressBar);
     this.fsm = this.addComponent(ActorStateMachine);
     this.fsm.init(data.type);
 
@@ -29,6 +33,7 @@ export class ActorManager extends EntityManager {
   }
 
   tick(dt) {
+    if (this.id !== DataManager.Instance.myPlayerId) return;
     if (DataManager.Instance.jm.input.length()) {
       const { x, y } = DataManager.Instance.jm.input;
       DataManager.Instance.applyInput({
@@ -51,11 +56,13 @@ export class ActorManager extends EntityManager {
     //根据左右方向不同翻转人物贴图
     if (direction.x !== 0) {
       this.node.setScale(direction.x > 0 ? 1 : -1, 1);
+      this.hp.node.setScale(direction.x > 0 ? 1 : -1, 1);
     }
     const side = Math.sqrt(direction.x ** 2 + direction.y ** 2);
     const rad = Math.asin(direction.y / side);
     const angle = rad2Angle(rad);
 
     this.wm.node.setRotationFromEuler(0, 0, angle);
+    this.hp.progress = data.hp / this.hp.totalLength;
   }
 }

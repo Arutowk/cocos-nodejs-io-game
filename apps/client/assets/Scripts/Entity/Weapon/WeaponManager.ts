@@ -37,7 +37,7 @@ export class WeaponManager extends EntityManager {
       this.handleWeaponShoot,
       this
     );
-    EventManager.Instance.on(EventEnum.BolletBorn, this.handleBolletBorn, this);
+    EventManager.Instance.on(EventEnum.BulletBorn, this.handleBulletBorn, this);
   }
 
   onDestroy() {
@@ -47,13 +47,14 @@ export class WeaponManager extends EntityManager {
       this
     );
     EventManager.Instance.off(
-      EventEnum.BolletBorn,
-      this.handleBolletBorn,
+      EventEnum.BulletBorn,
+      this.handleBulletBorn,
       this
     );
   }
 
   handleWeaponShoot() {
+    if (this.owner !== DataManager.Instance.myPlayerId) return;
     const pointWorldPos = this.point.getWorldPosition();
     const pointStagePos = DataManager.Instance.stage
       .getComponent(UITransform)
@@ -72,7 +73,7 @@ export class WeaponManager extends EntityManager {
     });
   }
 
-  handleBolletBorn(owner: number) {
+  handleBulletBorn(owner: number) {
     if (owner !== this.owner) return;
     this.state = EntityStateEnum.Attack;
   }

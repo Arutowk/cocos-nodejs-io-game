@@ -19,20 +19,36 @@ const BULLET_SPEED = 600;
 const mapW = 960;
 const mapH = 640;
 
+const ACTOR_RADIUS = 50;
+const BULLET_RADIUS = 10;
+
+const BULLET_DAMAGE = 5;
+
 export default class DataManager extends Singleton {
   static get Instance() {
     return super.GetInstance<DataManager>();
   }
 
+  myPlayerId = 1;
   state: IState = {
     actors: [
       {
         id: 1,
+        hp: 100,
         type: EntityTypeEnum.Actor1,
         weaponType: EntityTypeEnum.Weapon1,
         bulletType: EntityTypeEnum.Bullet2,
-        position: { x: 0, y: 0 },
+        position: { x: -150, y: -150 },
         direction: { x: 1, y: 0 },
+      },
+      {
+        id: 2,
+        hp: 100,
+        type: EntityTypeEnum.Actor1,
+        weaponType: EntityTypeEnum.Weapon1,
+        bulletType: EntityTypeEnum.Bullet2,
+        position: { x: 150, y: 150 },
+        direction: { x: -1, y: 0 },
       },
     ],
     bullets: [],
@@ -75,15 +91,33 @@ export default class DataManager extends Singleton {
         };
         this.state.bullets.push(bullet);
 
-        EventManager.Instance.emit(EventEnum.BolletBorn, owner);
+        EventManager.Instance.emit(EventEnum.BulletBorn, owner);
         break;
       }
       case InputTypeEnum.TimePast: {
         const { dt } = input;
-        const { bullets } = this.state;
+        const { bullets, actors } = this.state;
 
         for (let i = bullets.length - 1; i >= 0; i--) {
           const bullet = bullets[i];
+          for (let j = actors.length - 1; j >= 0; j--) {
+            const actor = actors[j];
+            //子弹打到玩家
+            if (
+              (actor.position.x - bullet.position.x) ** 2 +
+                (actor.position.y - bullet.position.y) ** 2 <
+              (BULLET_RADIUS + ACTOR_RADIUS) ** 2
+            ) {
+              actor.hp -= BULLET_DAMAGE;
+              EventManager.Instance.emit(EventEnum.ExplosionBorn, bullet.id, {
+                x: (bullet.position.x + actor.position.x) / 2,
+                y: (bullet.position.y + actor.position.y) / 2,
+              });
+              bullets.splice(i, 1);
+              break;
+            }
+          }
+          //判断子弹撞墙
           if (
             Math.abs(bullet.position.x) > mapW / 2 ||
             Math.abs(bullet.position.y) > mapH / 2
@@ -93,6 +127,7 @@ export default class DataManager extends Singleton {
               y: bullet.position.y,
             });
             bullets.splice(i, 1);
+            break;
           }
         }
 
