@@ -11,6 +11,7 @@ import { ActorManager } from "../Entity/Actor/ActorManager";
 import { BulletManager } from "../Entity/Bullet/BulletManager";
 import { PrefabPathEnum, TexturePathEnum } from "../Enum";
 import DataManager from "../Global/DataManager";
+import { NetworkManager } from "../Global/NetworkManager";
 import { ObjectPoolManager } from "../Global/ObjectPoolManager";
 import { ResourceManager } from "../Global/ResourceManager";
 import { JoyStickManager } from "../UI/JoyStickManager";
@@ -31,9 +32,25 @@ export class BattleManager extends Component {
   }
 
   async start() {
-    await this.loadRes();
-    this.initMap();
-    this.shouldUpdate = true;
+    await this.connectSever();
+    NetworkManager.Instance.sendMsg("nihao,wo shi cocos creator");
+    NetworkManager.Instance.listenMsg(
+      "haha",
+      (e) => {
+        console.log("listenMsg", e);
+      },
+      this
+    );
+    // await this.loadRes();
+    // this.initMap();
+    // this.shouldUpdate = true;
+  }
+
+  async connectSever() {
+    if (!(await NetworkManager.Instance.connect().catch(() => false))) {
+      await new Promise((res) => setTimeout(res, 1000));
+      await this.connectSever();
+    }
   }
 
   async loadRes() {
