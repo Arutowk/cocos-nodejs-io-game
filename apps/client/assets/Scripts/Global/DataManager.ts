@@ -30,6 +30,7 @@ export default class DataManager extends Singleton {
   }
 
   myPlayerId = 1;
+  frameId = 1;
   state: IState = {
     actors: [
       {

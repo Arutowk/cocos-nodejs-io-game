@@ -1,8 +1,9 @@
 import { _decorator, Component, Node, instantiate, ProgressBar } from "cc";
 import { EntityManager } from "../../Base/EntityManager";
 import { EntityTypeEnum, IActor, InputTypeEnum } from "../../Common";
-import { EntityStateEnum } from "../../Enum";
+import { EntityStateEnum, EventEnum } from "../../Enum";
 import DataManager from "../../Global/DataManager";
+import EventManager from "../../Global/EventManager";
 import { rad2Angle } from "../../Utils";
 import { WeaponManager } from "../Weapon/WeaponManager";
 import { ActorStateMachine } from "./ActorStateMachine";
@@ -36,7 +37,8 @@ export class ActorManager extends EntityManager {
     if (this.id !== DataManager.Instance.myPlayerId) return;
     if (DataManager.Instance.jm.input.length()) {
       const { x, y } = DataManager.Instance.jm.input;
-      DataManager.Instance.applyInput({
+
+      EventManager.Instance.emit(EventEnum.ClientSync, {
         type: InputTypeEnum.ActorMove,
         id: 1,
         direction: { x, y },
