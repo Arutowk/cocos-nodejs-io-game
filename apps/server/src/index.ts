@@ -2,13 +2,35 @@ import { symlinkCommon } from "./Utils";
 import { WebSocketServer } from "ws";
 import { ApiMsgEnum } from "./Common";
 import { Connection, MyServer } from "./Core";
+import { PlayerManager } from "./Biz/PlayerManager";
 
 symlinkCommon();
 
+declare module "./Core" {
+  interface Connection {
+    playerId: number;
+  }
+}
+
 const server = new MyServer({ port: 9876 });
 
+server.on("connection", () => {
+  console.log("来人了", server.connections.size);
+});
+
+server.on("disconnection", (connection: Connection) => {
+  console.log("走人了", server.connections.size);
+  if (connection.playerId) {
+    PlayerManager.Instance.removePlayer(connection.playerId);
+  }
+  console.log("size", PlayerManager.Instance.player.size);
+});
+
 server.setApi(ApiMsgEnum.ApiPlayerJoin, (connection: Connection, data: any) => {
-  return data + "我是服务端，我知道了";
+  const { nickname } = data;
+  const player = PlayerManager.Instance.createPlayer({ nickname, connection });
+  connection.playerId = player.id;
+  return { player: PlayerManager.Instance.getPlayerView(player) };
 });
 
 server
