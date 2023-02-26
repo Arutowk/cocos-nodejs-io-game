@@ -1,6 +1,6 @@
 import { symlinkCommon } from "./Utils";
 import { WebSocketServer } from "ws";
-import { ApiMsgEnum } from "./Common";
+import { ApiMsgEnum, IApiPlayerJoinReq } from "./Common";
 import { Connection, MyServer } from "./Core";
 import { PlayerManager } from "./Biz/PlayerManager";
 
@@ -26,12 +26,18 @@ server.on("disconnection", (connection: Connection) => {
   console.log("size", PlayerManager.Instance.player.size);
 });
 
-server.setApi(ApiMsgEnum.ApiPlayerJoin, (connection: Connection, data: any) => {
-  const { nickname } = data;
-  const player = PlayerManager.Instance.createPlayer({ nickname, connection });
-  connection.playerId = player.id;
-  return { player: PlayerManager.Instance.getPlayerView(player) };
-});
+server.setApi(
+  ApiMsgEnum.ApiPlayerJoin,
+  (connection: Connection, data: IApiPlayerJoinReq) => {
+    const { nickname } = data;
+    const player = PlayerManager.Instance.createPlayer({
+      nickname,
+      connection,
+    });
+    connection.playerId = player.id;
+    return { player: PlayerManager.Instance.getPlayerView(player) };
+  }
+);
 
 server
   .start()

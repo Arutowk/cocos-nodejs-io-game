@@ -1,6 +1,6 @@
 import { EventEmitter } from "stream";
 import { WebSocket, WebSocketServer } from "ws";
-import { ApiMsgEnum } from "../Common";
+import { ApiMsgEnum, IModel } from "../Common";
 import { Connection } from "./Connection";
 
 export class MyServer extends EventEmitter {
@@ -39,7 +39,10 @@ export class MyServer extends EventEmitter {
     });
   }
 
-  setApi(name: ApiMsgEnum, cb: Function) {
+  setApi<T extends keyof IModel["api"]>(
+    name: T,
+    cb: (connection: Connection, args: IModel["api"][T]["req"]) => void
+  ) {
     this.apiMap.set(name, cb);
   }
 }

@@ -10,6 +10,7 @@ import {
   ApiMsgEnum,
   EntityTypeEnum,
   IClientInput,
+  IMsgServerSync,
   InputTypeEnum,
 } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
@@ -173,7 +174,7 @@ export class BattleManager extends Component {
     NetworkManager.Instance.sendMsg(ApiMsgEnum.MsgClientSync, msg);
   }
 
-  handleServerSync({ inputs }: any) {
+  handleServerSync({ inputs }: IMsgServerSync) {
     for (const input of inputs) {
       DataManager.Instance.applyInput(input);
     }
