@@ -15,6 +15,8 @@ export enum EntityTypeEnum {
 
 export enum ApiMsgEnum {
   ApiPlayerJoin = "ApiPlayerJoin",
+  ApiPlayerList = "ApiPlayerList",
+  MsgPlayerList = "MsgPlayerList",
   MsgClientSync = "MsgClientSync",
   MsgServerSync = "MsgServerSync",
 }

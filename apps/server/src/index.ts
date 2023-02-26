@@ -1,6 +1,12 @@
 import { symlinkCommon } from "./Utils";
 import { WebSocketServer } from "ws";
-import { ApiMsgEnum, IApiPlayerJoinReq } from "./Common";
+import {
+  ApiMsgEnum,
+  IApiPlayerJoinReq,
+  IApiPlayerJoinRes,
+  IApiPlayerListReq,
+  IApiPlayerListRes,
+} from "./Common";
 import { Connection, MyServer } from "./Core";
 import { PlayerManager } from "./Biz/PlayerManager";
 
@@ -23,19 +29,30 @@ server.on("disconnection", (connection: Connection) => {
   if (connection.playerId) {
     PlayerManager.Instance.removePlayer(connection.playerId);
   }
-  console.log("size", PlayerManager.Instance.player.size);
+  //玩家离开时同步
+  PlayerManager.Instance.syncPlayers();
+  console.log("size", PlayerManager.Instance.players.size);
 });
 
 server.setApi(
   ApiMsgEnum.ApiPlayerJoin,
-  (connection: Connection, data: IApiPlayerJoinReq) => {
+  (connection: Connection, data: IApiPlayerJoinReq): IApiPlayerJoinRes => {
     const { nickname } = data;
     const player = PlayerManager.Instance.createPlayer({
       nickname,
       connection,
     });
     connection.playerId = player.id;
+    //有新玩家的时候就同步
+    PlayerManager.Instance.syncPlayers();
     return { player: PlayerManager.Instance.getPlayerView(player) };
+  }
+);
+
+server.setApi(
+  ApiMsgEnum.ApiPlayerList,
+  (connection: Connection, data: IApiPlayerListReq): IApiPlayerListRes => {
+    return { list: PlayerManager.Instance.getPlayersView() };
   }
 );
 

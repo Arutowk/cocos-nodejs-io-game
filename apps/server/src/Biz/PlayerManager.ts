@@ -1,5 +1,5 @@
 import Singleton from "../Base/Singleton";
-import { IApiPlayerJoinReq } from "../Common";
+import { ApiMsgEnum, IApiPlayerJoinReq } from "../Common";
 import { Connection } from "../Core";
 import { Player } from "./Player";
 
@@ -10,7 +10,7 @@ export class PlayerManager extends Singleton {
 
   nextPlayerId: number = 1;
 
-  player: Set<Player> = new Set();
+  players: Set<Player> = new Set();
   idMapPlayer: Map<number, Player> = new Map();
 
   createPlayer({
@@ -22,7 +22,7 @@ export class PlayerManager extends Singleton {
       nickname,
       connection,
     });
-    this.player.add(player);
+    this.players.add(player);
     this.idMapPlayer.set(player.id, player);
     return player;
   }
@@ -30,9 +30,21 @@ export class PlayerManager extends Singleton {
   removePlayer(pid: number) {
     const player = this.idMapPlayer.get(pid);
     if (player) {
-      this.player.delete(player);
+      this.players.delete(player);
       this.idMapPlayer.delete(player.id);
     }
+  }
+
+  syncPlayers() {
+    for (const player of this.players) {
+      player.connection.sendMsg(ApiMsgEnum.MsgPlayerList, {
+        list: this.getPlayersView(),
+      });
+    }
+  }
+
+  getPlayersView(players: Set<Player> = this.players) {
+    return [...players].map((p) => this.getPlayerView(p));
   }
 
   getPlayerView({ id, nickname, rid }: Player) {
