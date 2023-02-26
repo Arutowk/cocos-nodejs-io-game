@@ -1,10 +1,12 @@
 import { WebSocket, WebSocketServer } from "ws";
+import { ApiMsgEnum } from "../Common";
 import { Connection } from "./Connection";
 
 export class MyServer {
   port: number;
   wss: WebSocketServer;
   connections: Set<Connection> = new Set();
+  apiMap: Map<ApiMsgEnum, Function> = new Map();
 
   constructor({ port }: { port: number }) {
     this.port = port;
@@ -32,5 +34,9 @@ export class MyServer {
         });
       });
     });
+  }
+
+  setApi(name: ApiMsgEnum, cb: Function) {
+    this.apiMap.set(name, cb);
   }
 }
