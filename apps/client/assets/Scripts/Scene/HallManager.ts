@@ -1,7 +1,8 @@
 import { _decorator, Component, Node, Prefab, instantiate, director } from "cc";
 import { ApiMsgEnum, IApiPlayerListRes, IApiRoomListRes } from "../Common";
-import { SceneEnum } from "../Enum";
+import { EventEnum, SceneEnum } from "../Enum";
 import DataManager from "../Global/DataManager";
+import EventManager from "../Global/EventManager";
 import { NetworkManager } from "../Global/NetworkManager";
 import { PlayerManager } from "../UI/PlayerManager";
 import { RoomManager } from "../UI/RoomManager";
@@ -32,6 +33,7 @@ export class HallManager extends Component {
       this.renderRoom,
       this
     );
+    EventManager.Instance.on(EventEnum.RoomJoin, this.handleJoinRoom, this);
   }
 
   start() {
@@ -52,6 +54,7 @@ export class HallManager extends Component {
       this.renderRoom,
       this
     );
+    EventManager.Instance.off(EventEnum.RoomJoin, this.handleJoinRoom, this);
   }
 
   async getPlayer() {
@@ -118,6 +121,19 @@ export class HallManager extends Component {
     const { success, error, res } = await NetworkManager.Instance.callApi(
       ApiMsgEnum.ApiRoomCreate,
       {}
+    );
+    if (!success) {
+      console.log(error);
+      return;
+    }
+    DataManager.Instance.roomInfo = res.room;
+    director.loadScene(SceneEnum.Room);
+  }
+
+  async handleJoinRoom(rid: number) {
+    const { success, error, res } = await NetworkManager.Instance.callApi(
+      ApiMsgEnum.ApiRoomJoin,
+      { rid }
     );
     if (!success) {
       console.log(error);

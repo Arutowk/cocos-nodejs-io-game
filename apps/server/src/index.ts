@@ -8,6 +8,8 @@ import {
   IApiPlayerListRes,
   IApiRoomCreateReq,
   IApiRoomCreateRes,
+  IApiRoomJoinReq,
+  IApiRoomJoinRes,
   IApiRoomListReq,
   IApiRoomListRes,
 } from "./Common";
@@ -88,6 +90,27 @@ server.setApi(
   ApiMsgEnum.ApiRoomList,
   (connection: Connection, data: IApiRoomListReq): IApiRoomListRes => {
     return { list: RoomManager.Instance.getRoomsView() };
+  }
+);
+
+server.setApi(
+  ApiMsgEnum.ApiRoomJoin,
+  (connection: Connection, { rid }: IApiRoomJoinReq): IApiRoomJoinRes => {
+    if (connection.playerId) {
+      const room = RoomManager.Instance.joinRoom(rid, connection.playerId);
+      //创建时同步房间信息给所有玩家
+      RoomManager.Instance.syncRooms();
+      PlayerManager.Instance.syncPlayers();
+      //房间内同步
+      RoomManager.Instance.syncRoom(room.id);
+      if (room) {
+        return { room: RoomManager.Instance.getRoomView(room) };
+      } else {
+        throw new Error("房间不存在");
+      }
+    } else {
+      throw new Error("未登录");
+    }
   }
 );
 

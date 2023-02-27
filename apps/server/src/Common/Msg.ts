@@ -18,3 +18,7 @@ export interface IMsgPlayerList {
 export interface IMsgRoomList {
   list: IRoom[];
 }
+
+export interface IMsgRoom {
+  room: IRoom;
+}

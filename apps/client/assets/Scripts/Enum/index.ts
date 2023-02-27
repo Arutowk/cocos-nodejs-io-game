@@ -14,6 +14,7 @@ export enum EventEnum {
   ExplosionBorn = "ExplosionBorn",
   BulletBorn = "BulletBorn",
   ClientSync = "ClientSync",
+  RoomJoin = "RoomJoin",
 }
 
 export enum PrefabPathEnum {

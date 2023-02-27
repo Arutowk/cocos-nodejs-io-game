@@ -34,3 +34,11 @@ export interface IApiRoomListReq {}
 export interface IApiRoomListRes {
   list: IRoom[];
 }
+
+export interface IApiRoomJoinReq {
+  rid: number;
+}
+
+export interface IApiRoomJoinRes {
+  room: IRoom;
+}
