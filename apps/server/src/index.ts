@@ -8,6 +8,8 @@ import {
   IApiPlayerListRes,
   IApiRoomCreateReq,
   IApiRoomCreateRes,
+  IApiRoomListReq,
+  IApiRoomListRes,
 } from "./Common";
 import { Connection, MyServer } from "./Core";
 import { PlayerManager } from "./Biz/PlayerManager";
@@ -68,6 +70,9 @@ server.setApi(
         newRoom.id,
         connection.playerId
       );
+      //创建时同步房间信息给所有玩家
+      RoomManager.Instance.syncRooms();
+      PlayerManager.Instance.syncPlayers();
       if (room) {
         return { room: RoomManager.Instance.getRoomView(room) };
       } else {
@@ -76,6 +81,13 @@ server.setApi(
     } else {
       throw new Error("未登录");
     }
+  }
+);
+
+server.setApi(
+  ApiMsgEnum.ApiRoomList,
+  (connection: Connection, data: IApiRoomListReq): IApiRoomListRes => {
+    return { list: RoomManager.Instance.getRoomsView() };
   }
 );
 
