@@ -3,6 +3,8 @@ import {
   IApiPlayerJoinRes,
   IApiPlayerListReq,
   IApiPlayerListRes,
+  IApiRoomCreateReq,
+  IApiRoomCreateRes,
 } from "./Api";
 import { ApiMsgEnum } from "./Enum";
 import { IMsgClientSync, IMsgPlayerList, IMsgServerSync } from "./Msg";
@@ -16,6 +18,10 @@ export interface IModel {
     [ApiMsgEnum.ApiPlayerList]: {
       req: IApiPlayerListReq;
       res: IApiPlayerListRes;
+    };
+    [ApiMsgEnum.ApiRoomCreate]: {
+      req: IApiRoomCreateReq;
+      res: IApiRoomCreateRes;
     };
   };
   msg: {

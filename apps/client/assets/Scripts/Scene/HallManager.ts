@@ -1,5 +1,7 @@
-import { _decorator, Component, Node, Prefab, instantiate } from "cc";
+import { _decorator, Component, Node, Prefab, instantiate, director } from "cc";
 import { ApiMsgEnum, IApiPlayerListRes } from "../Common";
+import { SceneEnum } from "../Enum";
+import DataManager from "../Global/DataManager";
 import { NetworkManager } from "../Global/NetworkManager";
 import { PlayerManager } from "../UI/PlayerManager";
 const { ccclass, property } = _decorator;
@@ -58,5 +60,19 @@ export class HallManager extends Component {
       const node = this.playerContainer.children[i];
       node.getComponent(PlayerManager).init(data);
     }
+  }
+
+  async handleCreateRoom() {
+    const { success, error, res } = await NetworkManager.Instance.callApi(
+      ApiMsgEnum.ApiRoomCreate,
+      {}
+    );
+    if (!success) {
+      console.log(error);
+      return;
+    }
+    DataManager.Instance.roomInfo = res.room;
+    console.log("res", res);
+    director.loadScene(SceneEnum.Room);
   }
 }

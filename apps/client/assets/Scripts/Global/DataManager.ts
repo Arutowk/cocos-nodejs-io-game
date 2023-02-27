@@ -5,6 +5,7 @@ import {
   IBullet,
   IClientInput,
   InputTypeEnum,
+  IRoom,
   IState,
 } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
@@ -31,6 +32,8 @@ export default class DataManager extends Singleton {
 
   myPlayerId = 1;
   frameId = 1;
+  roomInfo: IRoom;
+
   state: IState = {
     actors: [
       {

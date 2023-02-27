@@ -6,9 +6,12 @@ import {
   IApiPlayerJoinRes,
   IApiPlayerListReq,
   IApiPlayerListRes,
+  IApiRoomCreateReq,
+  IApiRoomCreateRes,
 } from "./Common";
 import { Connection, MyServer } from "./Core";
 import { PlayerManager } from "./Biz/PlayerManager";
+import { RoomManager } from "./Biz/RoomManager";
 
 symlinkCommon();
 
@@ -53,6 +56,26 @@ server.setApi(
   ApiMsgEnum.ApiPlayerList,
   (connection: Connection, data: IApiPlayerListReq): IApiPlayerListRes => {
     return { list: PlayerManager.Instance.getPlayersView() };
+  }
+);
+
+server.setApi(
+  ApiMsgEnum.ApiRoomCreate,
+  (connection: Connection, data: IApiRoomCreateReq): IApiRoomCreateRes => {
+    if (connection.playerId) {
+      const newRoom = RoomManager.Instance.createRoom();
+      const room = RoomManager.Instance.joinRoom(
+        newRoom.id,
+        connection.playerId
+      );
+      if (room) {
+        return { room: RoomManager.Instance.getRoomView(room) };
+      } else {
+        throw new Error("房间不存在");
+      }
+    } else {
+      throw new Error("未登录");
+    }
   }
 );
 
