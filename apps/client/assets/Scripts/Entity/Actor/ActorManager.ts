@@ -9,7 +9,7 @@ import {
   tween,
 } from "cc";
 import { EntityManager } from "../../Base/EntityManager";
-import { EntityTypeEnum, IActor, InputTypeEnum } from "../../Common";
+import { EntityTypeEnum, IActor, InputTypeEnum, toFixed } from "../../Common";
 import { EntityStateEnum, EventEnum } from "../../Enum";
 import DataManager from "../../Global/DataManager";
 import EventManager from "../../Global/EventManager";
@@ -54,8 +54,8 @@ export class ActorManager extends EntityManager {
       EventManager.Instance.emit(EventEnum.ClientSync, {
         type: InputTypeEnum.ActorMove,
         id: DataManager.Instance.myPlayerId,
-        direction: { x, y },
-        dt,
+        direction: { x: toFixed(x), y: toFixed(y) },
+        dt: toFixed(dt),
       });
     } else {
       this.state = EntityStateEnum.Idle;

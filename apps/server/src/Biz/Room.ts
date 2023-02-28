@@ -5,6 +5,7 @@ import {
   IMsgClientSync,
   InputTypeEnum,
   IState,
+  toFixed,
 } from "../Common";
 import { Connection } from "../Core";
 import { Player } from "./Player";
@@ -113,7 +114,7 @@ export class Room {
     const dt = now - (this.lastTime ?? now);
     this.pendingInput.push({
       type: InputTypeEnum.TimePast,
-      dt,
+      dt: toFixed(dt),
     });
     this.lastTime = now;
   }
