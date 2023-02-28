@@ -1,4 +1,10 @@
-import { ApiMsgEnum, EntityTypeEnum, IState } from "../Common";
+import {
+  ApiMsgEnum,
+  EntityTypeEnum,
+  IClientInput,
+  IMsgClientSync,
+  IState,
+} from "../Common";
 import { Connection } from "../Core";
 import { Player } from "./Player";
 import { PlayerManager } from "./PlayerManager";
@@ -7,6 +13,8 @@ import { RoomManager } from "./RoomManager";
 export class Room {
   id: number;
   players: Set<Player> = new Set();
+
+  pendingInput: IClientInput[] = [];
 
   constructor(rid: number) {
     this.id = rid;
@@ -35,6 +43,14 @@ export class Room {
     this.players.clear();
   }
 
+  sync() {
+    for (const player of this.players) {
+      player.connection.sendMsg(ApiMsgEnum.MsgRoom, {
+        room: RoomManager.Instance.getRoomView(this),
+      });
+    }
+  }
+
   start() {
     const state: IState = {
       actors: [...this.players].map((player, index) => ({
@@ -55,13 +71,29 @@ export class Room {
       player.connection.sendMsg(ApiMsgEnum.MsgGameStart, {
         state,
       });
+      player.connection.listenMsg(
+        ApiMsgEnum.MsgClientSync,
+        this.getClientMsg,
+        this
+      );
     }
+
+    const timer1 = setInterval(() => {
+      this.sendServerMsg();
+    }, 100);
   }
 
-  sync() {
+  getClientMsg(connection, { input, frameId }: IMsgClientSync) {
+    this.pendingInput.push(input);
+  }
+
+  sendServerMsg() {
+    const inputs = this.pendingInput;
+    this.pendingInput = [];
     for (const player of this.players) {
-      player.connection.sendMsg(ApiMsgEnum.MsgRoom, {
-        room: RoomManager.Instance.getRoomView(this),
+      player.connection.sendMsg(ApiMsgEnum.MsgServerSync, {
+        lastFrameId: 0,
+        inputs,
       });
     }
   }
