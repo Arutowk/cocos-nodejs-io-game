@@ -30,13 +30,21 @@ export class RoomManager extends Singleton {
     }
   }
 
-  //   removePlayer(pid: number) {
-  //     const player = this.idMapPlayer.get(pid);
-  //     if (player) {
-  //       this.players.delete(player);
-  //       this.idMapPlayer.delete(player.id);
-  //     }
-  //   }
+  leaveRoom(rid: number, uid: number) {
+    const room = this.idMapRoom.get(rid);
+    if (room) {
+      room.leave(uid);
+    }
+  }
+
+  closeRoom(rid: number) {
+    const room = this.idMapRoom.get(rid);
+    if (room) {
+      room.close();
+      this.rooms.delete(room);
+      this.idMapRoom.delete(room.id);
+    }
+  }
 
   syncRooms() {
     for (const player of PlayerManager.Instance.players) {

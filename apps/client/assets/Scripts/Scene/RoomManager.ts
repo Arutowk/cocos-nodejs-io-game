@@ -1,5 +1,6 @@
-import { _decorator, Component, Node, Prefab, instantiate } from "cc";
+import { _decorator, Component, Node, Prefab, instantiate, director } from "cc";
 import { ApiMsgEnum, IMsgRoom } from "../Common";
+import { SceneEnum } from "../Enum";
 import DataManager from "../Global/DataManager";
 import { NetworkManager } from "../Global/NetworkManager";
 import { PlayerManager } from "../UI/PlayerManager";
@@ -50,17 +51,17 @@ export class RoomManager extends Component {
     }
   }
 
-  //   async handleCreateRoom() {
-  //     const { success, error, res } = await NetworkManager.Instance.callApi(
-  //       ApiMsgEnum.ApiRoomCreate,
-  //       {}
-  //     );
-  //     if (!success) {
-  //       console.log(error);
-  //       return;
-  //     }
-  //     DataManager.Instance.roomInfo = res.room;
-  //     console.log("res", res);
-  //     director.loadScene(SceneEnum.Room);
-  //   }
+  async handleLeaveRoom() {
+    const { success, error, res } = await NetworkManager.Instance.callApi(
+      ApiMsgEnum.ApiRoomLeave,
+      {}
+    );
+    if (!success) {
+      console.log(error);
+      return;
+    }
+    DataManager.Instance.roomInfo = null;
+    console.log("res", res);
+    director.loadScene(SceneEnum.Hall);
+  }
 }
