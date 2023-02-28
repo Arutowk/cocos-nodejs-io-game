@@ -46,6 +46,13 @@ export class RoomManager extends Singleton {
     }
   }
 
+  startRoom(rid: number) {
+    const room = this.idMapRoom.get(rid);
+    if (room) {
+      room.start();
+    }
+  }
+
   syncRooms() {
     for (const player of PlayerManager.Instance.players) {
       player.connection.sendMsg(ApiMsgEnum.MsgRoomList, {

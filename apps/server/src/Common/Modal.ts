@@ -1,4 +1,6 @@
 import {
+  IApiGameStartReq,
+  IApiGameStartRes,
   IApiPlayerJoinReq,
   IApiPlayerJoinRes,
   IApiPlayerListReq,
@@ -15,6 +17,7 @@ import {
 import { ApiMsgEnum } from "./Enum";
 import {
   IMsgClientSync,
+  IMsgGameStart,
   IMsgPlayerList,
   IMsgRoom,
   IMsgRoomList,
@@ -47,10 +50,15 @@ export interface IModel {
       req: IApiRoomLeaveReq;
       res: IApiRoomLeaveRes;
     };
+    [ApiMsgEnum.ApiGameStart]: {
+      req: IApiGameStartReq;
+      res: IApiGameStartRes;
+    };
   };
   msg: {
     [ApiMsgEnum.MsgPlayerList]: IMsgPlayerList;
     [ApiMsgEnum.MsgRoom]: IMsgRoom;
+    [ApiMsgEnum.MsgGameStart]: IMsgGameStart;
     [ApiMsgEnum.MsgRoomList]: IMsgRoomList;
     [ApiMsgEnum.MsgClientSync]: IMsgClientSync;
     [ApiMsgEnum.MsgServerSync]: IMsgServerSync;

@@ -2,6 +2,8 @@ import { symlinkCommon } from "./Utils";
 import { WebSocketServer } from "ws";
 import {
   ApiMsgEnum,
+  IApiGameStartReq,
+  IApiGameStartRes,
   IApiPlayerJoinReq,
   IApiPlayerJoinRes,
   IApiPlayerListReq,
@@ -131,6 +133,33 @@ server.setApi(
           RoomManager.Instance.syncRooms();
           PlayerManager.Instance.syncPlayers();
           //房间内同步
+          RoomManager.Instance.syncRoom(rid);
+          return {};
+        } else {
+          throw new Error("玩家不在房间");
+        }
+      } else {
+        throw new Error("玩家不存在");
+      }
+    } else {
+      throw new Error("未登录");
+    }
+  }
+);
+
+server.setApi(
+  ApiMsgEnum.ApiGameStart,
+  (connection: Connection, data: IApiGameStartReq): IApiGameStartRes => {
+    if (connection.playerId) {
+      const player = PlayerManager.Instance.idMapPlayer.get(
+        connection.playerId
+      );
+      if (player) {
+        const rid = player.rid;
+        if (rid) {
+          RoomManager.Instance.startRoom(rid);
+          PlayerManager.Instance.syncPlayers();
+          RoomManager.Instance.syncRooms();
           RoomManager.Instance.syncRoom(rid);
           return {};
         } else {

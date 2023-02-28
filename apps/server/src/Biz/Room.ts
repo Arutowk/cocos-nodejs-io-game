@@ -1,4 +1,4 @@
-import { ApiMsgEnum } from "../Common";
+import { ApiMsgEnum, EntityTypeEnum, IState } from "../Common";
 import { Connection } from "../Core";
 import { Player } from "./Player";
 import { PlayerManager } from "./PlayerManager";
@@ -33,6 +33,29 @@ export class Room {
 
   close() {
     this.players.clear();
+  }
+
+  start() {
+    const state: IState = {
+      actors: [...this.players].map((player, index) => ({
+        id: player.id,
+        nickname: player.nickname,
+        hp: 100,
+        type: EntityTypeEnum.Actor1,
+        weaponType: EntityTypeEnum.Weapon1,
+        bulletType: EntityTypeEnum.Bullet2,
+        position: { x: -150 + index * 300, y: -150 + index * 300 },
+        direction: { x: 1, y: 0 },
+      })),
+      bullets: [],
+      nextBulletId: 1,
+    };
+
+    for (const player of this.players) {
+      player.connection.sendMsg(ApiMsgEnum.MsgGameStart, {
+        state,
+      });
+    }
   }
 
   sync() {

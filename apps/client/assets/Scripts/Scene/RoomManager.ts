@@ -1,5 +1,5 @@
 import { _decorator, Component, Node, Prefab, instantiate, director } from "cc";
-import { ApiMsgEnum, IMsgRoom } from "../Common";
+import { ApiMsgEnum, IMsgGameStart, IMsgRoom } from "../Common";
 import { SceneEnum } from "../Enum";
 import DataManager from "../Global/DataManager";
 import { NetworkManager } from "../Global/NetworkManager";
@@ -20,6 +20,11 @@ export class RoomManager extends Component {
       this.renderPlayer,
       this
     );
+    NetworkManager.Instance.listenMsg(
+      ApiMsgEnum.MsgGameStart,
+      this.handleGameStart,
+      this
+    );
   }
 
   start() {
@@ -32,6 +37,16 @@ export class RoomManager extends Component {
       this.renderPlayer,
       this
     );
+    NetworkManager.Instance.unlistenMsg(
+      ApiMsgEnum.MsgGameStart,
+      this.handleGameStart,
+      this
+    );
+  }
+
+  handleGameStart({ state }: IMsgGameStart) {
+    DataManager.Instance.state = state;
+    director.loadScene(SceneEnum.Battle);
   }
 
   renderPlayer({ room: { players: list } }: IMsgRoom) {
@@ -63,5 +78,16 @@ export class RoomManager extends Component {
     DataManager.Instance.roomInfo = null;
     console.log("res", res);
     director.loadScene(SceneEnum.Hall);
+  }
+
+  async handleStart() {
+    const { success, error, res } = await NetworkManager.Instance.callApi(
+      ApiMsgEnum.ApiGameStart,
+      {}
+    );
+    if (!success) {
+      console.log(error);
+      return;
+    }
   }
 }

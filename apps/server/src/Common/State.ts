@@ -7,6 +7,7 @@ export interface IVec2 {
 
 export interface IActor {
   id: number;
+  nickname: string;
   hp: number;
   position: IVec2;
   direction: IVec2;
