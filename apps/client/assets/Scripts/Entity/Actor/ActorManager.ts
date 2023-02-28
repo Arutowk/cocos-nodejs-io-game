@@ -1,4 +1,13 @@
-import { _decorator, Component, Node, instantiate, ProgressBar } from "cc";
+import {
+  _decorator,
+  Component,
+  Node,
+  instantiate,
+  ProgressBar,
+  Vec3,
+  Tween,
+  tween,
+} from "cc";
 import { EntityManager } from "../../Base/EntityManager";
 import { EntityTypeEnum, IActor, InputTypeEnum } from "../../Common";
 import { EntityStateEnum, EventEnum } from "../../Enum";
@@ -16,6 +25,8 @@ export class ActorManager extends EntityManager {
 
   private hp: ProgressBar;
   private wm: WeaponManager;
+  private targetPos: Vec3;
+  private tw: Tween<unknown>;
 
   init(data: IActor) {
     this.id = data.id;
@@ -25,6 +36,8 @@ export class ActorManager extends EntityManager {
     this.fsm.init(data.type);
 
     this.state = EntityStateEnum.Idle;
+    this.node.active = false;
+    this.targetPos = undefined;
 
     const prefab = DataManager.Instance.prefabMap.get(EntityTypeEnum.Weapon1);
     const weapon = instantiate(prefab);
@@ -44,27 +57,52 @@ export class ActorManager extends EntityManager {
         direction: { x, y },
         dt,
       });
-
-      this.state = EntityStateEnum.Run;
     } else {
       this.state = EntityStateEnum.Idle;
     }
   }
 
   render(data: IActor) {
-    const { direction, position } = data;
-    this.node.setPosition(position.x, position.y);
+    this.renderPos(data);
+    this.renderDir(data);
+    this.renderHP(data);
+  }
 
-    //根据左右方向不同翻转人物贴图
-    if (direction.x !== 0) {
-      this.node.setScale(direction.x > 0 ? 1 : -1, 1);
-      this.hp.node.setScale(direction.x > 0 ? 1 : -1, 1);
+  renderPos(data: IActor) {
+    const newPos = new Vec3(data.position.x, data.position.y);
+    if (!this.targetPos) {
+      this.node.active = true;
+      this.node.setPosition(newPos);
+      this.targetPos = new Vec3(newPos);
+    } else if (!this.targetPos.equals(newPos)) {
+      this.tw?.stop();
+      this.node.setPosition(this.targetPos);
+      this.targetPos.set(newPos);
+      this.state = EntityStateEnum.Run;
+      this.tw = tween(this.node)
+        .to(0.1, { position: this.targetPos })
+        .call(() => {
+          this.state = EntityStateEnum.Idle;
+        })
+        .start();
     }
-    const side = Math.sqrt(direction.x ** 2 + direction.y ** 2);
-    const rad = Math.asin(direction.y / side);
+    this.node.setPosition(data.position.x, data.position.y);
+  }
+
+  renderDir(data: IActor) {
+    //根据左右方向不同翻转人物贴图
+    if (data.direction.x !== 0) {
+      this.node.setScale(data.direction.x > 0 ? 1 : -1, 1);
+      this.hp.node.setScale(data.direction.x > 0 ? 1 : -1, 1);
+    }
+    const side = Math.sqrt(data.direction.x ** 2 + data.direction.y ** 2);
+    const rad = Math.asin(data.direction.y / side);
     const angle = rad2Angle(rad);
 
     this.wm.node.setRotationFromEuler(0, 0, angle);
+  }
+
+  renderHP(data: IActor) {
     this.hp.progress = data.hp / this.hp.totalLength;
   }
 }
