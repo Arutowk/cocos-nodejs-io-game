@@ -17,6 +17,8 @@ export class Room {
 
   pendingInput: IClientInput[] = [];
   lastTime: number = undefined;
+  //playerId和frameId
+  lastPlayerFrameIdMap: Map<number, number> = new Map();
 
   constructor(rid: number) {
     this.id = rid;
@@ -89,8 +91,10 @@ export class Room {
     }, 16);
   }
 
-  getClientMsg(connection, { input, frameId }: IMsgClientSync) {
+  getClientMsg(connection: Connection, { input, frameId }: IMsgClientSync) {
     this.pendingInput.push(input);
+    //收到客户端消息时，保存frameid
+    this.lastPlayerFrameIdMap.set(connection.playerId, frameId);
   }
 
   sendServerMsg() {
@@ -98,7 +102,7 @@ export class Room {
     this.pendingInput = [];
     for (const player of this.players) {
       player.connection.sendMsg(ApiMsgEnum.MsgServerSync, {
-        lastFrameId: 0,
+        lastFrameId: this.lastPlayerFrameIdMap.get(player.id) ?? 0,
         inputs,
       });
     }

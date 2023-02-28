@@ -34,6 +34,8 @@ export default class DataManager extends Singleton {
   frameId = 1;
   roomInfo: IRoom;
 
+  lastState: IState;
+
   state: IState = {
     actors: [
       // {

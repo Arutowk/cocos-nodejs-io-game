@@ -10,6 +10,7 @@ import {
   ApiMsgEnum,
   EntityTypeEnum,
   IClientInput,
+  IMsgClientSync,
   IMsgServerSync,
   InputTypeEnum,
 } from "../Common";
@@ -22,6 +23,7 @@ import { NetworkManager } from "../Global/NetworkManager";
 import { ObjectPoolManager } from "../Global/ObjectPoolManager";
 import { ResourceManager } from "../Global/ResourceManager";
 import { JoyStickManager } from "../UI/JoyStickManager";
+import { deepClone } from "../Utils";
 const { ccclass, property } = _decorator;
 
 @ccclass("BattleManager")
@@ -29,6 +31,7 @@ export class BattleManager extends Component {
   private stage: Node;
   private ui: Node;
   private shouldUpdate = false;
+  private pendingMsg: IMsgClientSync[] = [];
 
   onLoad() {}
 
@@ -172,11 +175,24 @@ export class BattleManager extends Component {
   handleClientSync(input: IClientInput) {
     const msg = { input, frameId: DataManager.Instance.frameId++ };
     NetworkManager.Instance.sendMsg(ApiMsgEnum.MsgClientSync, msg);
+
+    if (input.type === InputTypeEnum.ActorMove) {
+      DataManager.Instance.applyInput(input);
+      this.pendingMsg.push(msg);
+    }
   }
 
-  handleServerSync({ inputs }: IMsgServerSync) {
+  handleServerSync({ inputs, lastFrameId }: IMsgServerSync) {
+    DataManager.Instance.state = DataManager.Instance.lastState;
     for (const input of inputs) {
       DataManager.Instance.applyInput(input);
+    }
+    DataManager.Instance.lastState = deepClone(DataManager.Instance.state);
+    this.pendingMsg = this.pendingMsg.filter(
+      (msg) => msg.frameId > lastFrameId
+    );
+    for (const msg of this.pendingMsg) {
+      DataManager.Instance.applyInput(msg.input);
     }
   }
 }
