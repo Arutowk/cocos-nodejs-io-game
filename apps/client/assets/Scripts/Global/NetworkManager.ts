@@ -1,6 +1,13 @@
 import { _decorator, resources, Asset } from "cc";
 import Singleton from "../Base/Singleton";
-import { IModel, strdecode, strencode } from "../Common";
+import {
+  ApiMsgEnum,
+  binaryDecode,
+  binaryEncode,
+  IModel,
+  strdecode,
+  strencode,
+} from "../Common";
 
 interface IItem {
   cb: Function;
@@ -20,7 +27,7 @@ export class NetworkManager extends Singleton {
 
   port = 9876;
   ws: WebSocket;
-  private map: Map<string, Array<IItem>> = new Map();
+  private map: Map<ApiMsgEnum, Array<IItem>> = new Map();
   isConnected = false;
 
   connect() {
@@ -48,9 +55,7 @@ export class NetworkManager extends Singleton {
 
       this.ws.onmessage = (e) => {
         try {
-          const ta = new Uint8Array(e.data);
-          const str = strdecode(ta);
-          const json = JSON.parse(str);
+          const json = binaryDecode(e.data);
           const { name, data } = json;
           if (this.map.has(name)) {
             this.map.get(name).forEach(({ cb, ctx }) => {
@@ -93,14 +98,7 @@ export class NetworkManager extends Singleton {
     data: IModel["msg"][T]
   ) {
     const msg = { name, data };
-    // await new Promise((rs) => setTimeout(rs, 2000));
-    const str = JSON.stringify(msg);
-    const ta = strencode(str);
-    const ab = new ArrayBuffer(ta.length);
-    const da = new DataView(ab);
-    for (let index = 0; index < ta.length; index++) {
-      da.setUint8(index, ta[index]);
-    }
+    const da = binaryEncode(name, data);
     this.ws.send(da.buffer);
   }
 
